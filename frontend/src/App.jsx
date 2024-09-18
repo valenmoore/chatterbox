@@ -1,4 +1,4 @@
-import './App.css'
+import './App.scss'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import FreeformChat from './components/Chat/FreeformChat'
 import StoryChat from './components/Chat/StoryChat';

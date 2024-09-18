@@ -6,7 +6,7 @@ import translate from "translate";
 const lngDetector = new LanguageDetect();*/
 import { useLocation, useNavigate } from 'react-router-dom';
 import { languageMap } from '../../constants/constants'
-import { getAiResponse } from '../../utils/chatFunctions';
+import { getAiResponse, getAudioBuffer, getMessageWordsPerMinute, analyzeSilence } from '../../utils/chatFunctions';
 
 const Chat = () => {
     const location = useLocation();
@@ -17,23 +17,25 @@ const Chat = () => {
           navigate("/dashboard");
         }
     }, [navigate]);
-    /*useEffect(() => {
+    useEffect(() => {
         setConversationHistory([
             {
                 role: "user",
-                parts: [{ text: `Ask me questions about my life, interests, hobbies, and actions. Don't offer too much information about yourself, just ask me open-ended questions.` }],
+                parts: [{ text: `Be very conversational and pretend like you are a real person. Do not mention that you are AI or a computer, pretend to be a real person named ${params.aiName} in the following situation: ${params.scenario}. Be conversational.` }],
                 isCounted: false
             },
             {
                 role: "model",
-                parts: [{ text: `Got it. I'll ask open-ended questions.` }],
+                parts: [{ text: `Got it. My name is ${params.aiName} and I am in this scenario: ${params.scenario}. I will be conversational and pretend I am a real person, not an AI model.` }],
                 isCounted: false
             }
         ]);
-    }, []);*/
+    }, []);
     const [messages, setMessages] = useState([]);
+    const [userMessageStats, setUserMessageStats] = useState([]);
     const [conversationHistory, setConversationHistory] = useState([]);
     const translateText = async (from, to, text) => {
+        console.log(from, to, text)
         const result = await translate(text, { to, from });
         return result;
     }
@@ -112,15 +114,28 @@ const Chat = () => {
         return detect[0][0];
     }*/
 
-    const handleSendPrompt = async (prompt, isDummy=false) => {
+    const handleMessageStat = async (prompt, audio) => {
+        const buffer = await getAudioBuffer(audio);
+        const wpm = getMessageWordsPerMinute(buffer, prompt);
+        const silence = analyzeSilence(buffer);
+        console.log(wpm)
+        console.log(silence)
+        const messageStat = { text: prompt, audio: audio };
+        setUserMessageStats(prev => [...prev, messageStat]);
+    }
+
+    const handleSendPrompt = async (prompt, audio, isDummy=false) => {
         if (messages.length > 0 && messages[messages.length - 1].role === "user") return
         setMessages(prevMessages => [...prevMessages, {role: "user", content: prompt, isDummy}]);
-        console.log(conversationHistory)
+
+        handleMessageStat(prompt, audio);
+
         let finalResponse;
         isDummy = false;
         let translatedPrompt;
         let isCounted;
         try {
+            console.log(language.abrev, "en", prompt);
             translatedPrompt = await translateText(language.abrev, "en", prompt); // Todo: check if user actually replied in correct language
             let response = await getAiResponse(translatedPrompt, conversationHistory);
             isCounted = true;
@@ -141,19 +156,22 @@ const Chat = () => {
         }
     };
 
+
     return (
         <div className="chat-container">
             <div className="chat-messages">
                 {messages.map((message, index) => {
                     if (!message.isDummy) {
                         return (
-                            <ChatBubble key={index} message={message.content} language={language} translateFunction={translateText} isUser={message.role === "user"} />
+                            <ChatBubble key={index} message={message.content} language={language} translateFunction={translateText} isUser={message.role === "user"} blurred={params.blurMessages} />
                         );
                     }
                     return null;
                 })}
             </div>
-            <Input handlePrompt={handleSendPrompt} language={language} />
+            <div className="input-container">
+                <Input handlePrompt={handleSendPrompt} language={language} />
+            </div>
         </div>
     );
 };

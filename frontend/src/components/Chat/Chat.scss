@@ -1,0 +1,50 @@
+#root {
+    height: 100vh;
+}
+
+.chat-container {
+    --padding: 1.5em;
+    height: calc(100% - 2 * var(--padding));
+    width: calc(100% - 2 * var(--padding));
+    display: grid;
+    grid-template-rows: 8fr 1fr;
+    padding: var(--padding);
+
+    .chat-messages {
+        --user-bubble-color: rgb(27, 140, 209);
+        --ai-bubble-color: rgb(238, 98, 59);
+        display: flex;
+        flex-direction: column;
+        overflow-y: scroll;
+        .chat-bubble {
+            width: 75%;
+            background-color: var(--user-bubble-color);
+            margin-bottom: 2%;
+            padding: 0.5em;
+            border-radius: 0.5em;
+            position: relative;
+            span {
+                transition: filter 0.5s;
+            }
+        }
+        .chat-bubble.ai {
+            background-color: var(--ai-bubble-color);
+            align-self: end;
+        }
+        .chat-bubble.blurred span {
+            filter: blur(3px);
+        }
+    }
+
+    .input-container {
+        width: 100%;
+        form {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            input {
+                width: 70%;
+            }
+        }
+    }
+}

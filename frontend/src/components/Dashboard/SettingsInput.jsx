@@ -17,7 +17,7 @@ const SettingsInput = () => {
         const aiName = e.target.elements['name-input'].value;
         const chatType = e.target.elements['chat-type'].value;
         const gender = "NEUTRAL";
-        navigate('/' + chatType, { state: { languageName, scenario, speed, aiName, gender } });
+        navigate('/' + chatType, { state: { languageName, scenario, speed, aiName, gender, blurMessages: true } });
     }
     return (
         <>

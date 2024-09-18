@@ -1,6 +1,7 @@
 import translate from "translate";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { languageMap } from '../constants/constants';
+import model from "../gemini";
 
 
 export const translateText = async (from, to, text) => {
@@ -19,9 +20,7 @@ export const getAiResponse = async (prompt, messages) => {
      * @param {Array<Message>} messages The array of previous messages in the conversation.
      * @returns {string} The AI response.
     */
-    console.log(prompt);
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
     const chat = model.startChat({
         history: [
             ...messages.map(message => ({
@@ -34,8 +33,7 @@ export const getAiResponse = async (prompt, messages) => {
         },
     });
     const result = await chat.sendMessage(prompt);
-    const response = await result.response;
-    return response.text();
+    return result.response.text()
 } 
 
 export const screenMessage = async (message, conversationMission) => {
@@ -144,8 +142,7 @@ export const screenMessage = async (message, conversationMission) => {
         safetySettings,
     });
 
-    const response = result.response;
-    return response.text();
+    return result.response.text();
 }
 
 export const getMessageSentiment = async (prompt) => {
@@ -264,10 +261,52 @@ export const gradeExamResponse = async (question, prompt) => {
     const result = await model.generateContent({
         contents: [{ role: "user", parts }],
         generationConfig,
-        safetySettings,
-    });
-
+      });
     return result.response.text();
+}
+
+export const getMessageFeedback = message => {
+    const generationConfig = {
+        temperature: 1,
+        topP: 0.95,
+        topK: 64,
+        maxOutputTokens: 8192,
+        responseMimeType: "text/plain",
+      };
+      
+      async function run() {
+        const parts = [
+          {text: "Grade each sentence of a users response and provide feedback about grammar and wording. Respond with a json object where each sentence is used as a key and the value is your feedback for that sentence. Respond 'This sentence is correct' if the sentence has no errors and you have no feedback. This is a language student so be constructive."},
+          {text: "input: Bonjor! Je m'appelle Joe. Je vas au chez mes grand-parents pour ses voire ce week-end. Tu faire quel ce week-end?"},
+          {text: "output: {\n'Bonjor!': 'Bonjor should be spelled \"Bonjour\"',\n'Je m'appelle Joe.': 'This sentence is correct'\n'Je vas au chez mes grand-parents pour ses voire ce week-end': 'Je vas should be replaced with \"Je vais\" because the \"je\" form of \"aller\" is \"vais\". However, this is a good example of direct objects with the use of \"ses\".',\n'Tu faire quel ce week-end?': 'Questions in french should not be structured like this. Instead, consider using \"Qu'est-ce que tu fais ce week-end\" or inversion: \"Quel fais-tu ce week-end?\". Also remember to conjugate \"faire\" to be \"fais\".'\n}"},
+          {text: "input: Salut! Je allez au magasine demain. Je suis très éxcite pour la faire. Je beaucoup aime magasin."},
+          {text: "output: {\n\"Salut!\": 'This sentence is correct',\n\"Je allez au magasine demain\": \"Je allez should be replaced with \\\"Je vais\\\" because the \\\"je\\\" form of \\\"aller\\\" is \\\"vais\\\". Magasine should be spelled \\\"magasin\\\"\",\n\"Je suis très éxcite pour la faire.\": \"Très éxcite should be spelled \\\"très excité\\\". Also, avoid the use of \\\"excité\"\\ because of its connotations. The article \\\"la\\\" is not needed here. Use \\\"faire\\\" without the article.\",\n\"Je beaucoup aime magasin.\": \"The order of words is incorrect. Consider saying \\\"J'aime beaucoup le magasin.\\\" or \\\"J'aime beaucoup magasiner.\\\" \"\n}"},
+          {text: "input: Hier, je suis allé à Paris avec ma famille. Nous avons visité la Tour Eiffel et avons pris des photos devant. Après, nous avons mangé dans un restaurant italien, les pâtes étaient très bonnes. Nous avons aussi allé au musée du Louvre. C'était une journée très excitante, mais je suis un peu fatigué maintenant."},
+          {text: "output: {\n  \"Hier, je suis allé à Paris avec ma famille.\": \"This sentence is correct.\",\n  \"Nous avons visité la Tour Eiffel et avons pris des photos devant.\": \"This sentence is correct.\",\n  \"Après, nous avons mangé dans un restaurant italien, les pâtes étaient très bonnes.\": \"This sentence is correct.\",\n  \"Nous avons aussi allé au musée du Louvre.\": \"'Allé' should be 'allés' to agree with 'nous avons' and match the past tense; the corrected sentence is 'nous sommes aussi allés au musée du Louvre.'\",\n  \"C'était une journée très excitante, mais je suis un peu fatigué maintenant.\": \"The phrase is correct, though 'fatigué' should match the speaker's gender. If the speaker is female, it should be 'fatiguée.'\"\n}"},
+          {text: "input: Ayer, fui a Madrid con mi familia. Visitamos el Palacio Real y tomamos muchas fotos. Después, comimos en un restaurante español, la comida estaba muy deliciosa. También fuimos al parque del Retiro. Fue una tarde muy agradable, pero estaba un poco cansada al final."},
+          {text: "output: {\n  \"Ayer, fui a Madrid con mi familia.\": \"This sentence is correct.\",\n  \"Visitamos el Palacio Real y tomamos muchas fotos.\": \"This sentence is correct.\",\n  \"Después, comimos en un restaurante español, la comida estaba muy deliciosa.\": \"The phrase 'muy deliciosa' is correct, though it is slightly more natural to say 'deliciosa' without 'muy' in this context.\",\n  \"También fuimos al parque del Retiro.\": \"This sentence is correct.\",\n  \"Fue una tarde muy agradable, pero estaba un poco cansada al final.\": \"The phrase is correct. If the speaker is male, 'cansada' should be 'cansado.'\"\n}"},
+          {text: "input: Ieri, sono andato a Roma con la mia famiglia. Abbiamo visitato il Colosseo e abbiamo scattato molte foto. Dopo, abbiamo mangiato in un ristorante italiano, la pizza era molto deliziosa. Poi, siamo andati al Foro Romano. È stata una giornata molto divertente, ma ero un po' stanco alla fine."},
+          {text: "output: {\n  \"Ieri, sono andato a Roma con la mia famiglia.\": \"This sentence is correct.\",\n  \"Abbiamo visitato il Colosseo e abbiamo scattato molte foto.\": \"This sentence is correct.\",\n  \"Dopo, abbiamo mangiato in un ristorante italiano, la pizza era molto deliziosa.\": \"This sentence is correct.\",\n  \"Poi, siamo andati al Foro Romano.\": \"This sentence is correct.\",\n  \"È stata una giornata molto divertente, ma ero un po' stanco alla fine.\": \"The phrase is correct. If the speaker is female, 'stanco' should be 'stanca.'\"\n}"},
+          {text: "input: Hoy, fui a Barcelona con mis amigos. Visitamos la Sagrada Familia y sacamos muchas fotos. Luego, comimos en una cafetería, la comida estaba muy buena. Después, fuimos a la mercado de La Boquería. Fue un día muy divertido, pero estaba cansado al final."},
+          {text: "output: {\n  \"Hoy, fui a Barcelona con mis amigos.\": \"This sentence is correct.\",\n  \"Visitamos la Sagrada Familia y sacamos muchas fotos.\": \"This sentence is correct.\",\n  \"Luego, comimos en una cafetería, la comida estaba muy buena.\": \"The phrase 'muy buena' is acceptable, though 'muy buena' might be less natural than 'muy buena' in this context.\",\n  \"Después, fuimos a la mercado de La Boquería.\": \"'La mercado' should be 'el mercado' because 'mercado' is masculine, so it should be 'al mercado de La Boquería.'\",\n  \"Fue un día muy divertido, pero estaba cansado al final.\": \"The phrase is correct. If the speaker is female, 'cansado' should be 'cansada.'\"\n}"},
+          {text: "input: Aujourd'hui, je suis allé à Lyon avec mes amis. Nous avons visité la Basilique Notre-Dame de Fourvière et pris beaucoup des photos. Après, nous avons mangé dans un restaurant, les plats étaient très bon. Ensuite, nous sommes allés au Parc de la Tête d'Or. C'était une journée très agréable, mais je suis un peu fatigué maintenant."},
+          {text: "output: {\n  \"Aujourd'hui, je suis allé à Lyon avec mes amis.\": \"This sentence is correct.\",\n  \"Nous avons visité la Basilique Notre-Dame de Fourvière et pris beaucoup des photos.\": \"'Beaucoup des' should be 'beaucoup de' because 'de' is used with 'beaucoup,' so it should be 'beaucoup de photos.'\",\n  \"Après, nous avons mangé dans un restaurant, les plats étaient très bon.\": \"'Très bon' should be 'très bons' to agree with the plural noun 'plats,' so it should be 'les plats étaient très bons.'\",\n  \"Ensuite, nous sommes allés au Parc de la Tête d'Or.\": \"This sentence is correct.\",\n  \"C'était une journée très agréable, mais je suis un peu fatigué maintenant.\": \"The phrase is correct. If the speaker is female, 'fatigué' should be 'fatiguée.'\"\n}"},
+          {text: "input: Gestern bin ich nach Berlin mit meine Familie gefahren. Wir haben das Brandenburger Tor besucht und viele Fotos gemacht. Danach haben wir in einem Restaurant gegessen, das Essen war sehr lecker. Später sind wir zum Alexanderplatz gegangen. Es war ein sehr schöne Tag, aber ich war am Ende ein bisschen müde."},
+          {text: "output: {\n  \"Gestern bin ich nach Berlin mit meine Familie gefahren.\": \"'Meine' should be 'meiner' to agree with the dative case used with 'mit,' so it should be 'mit meiner Familie.'\",\n  \"Wir haben das Brandenburger Tor besucht und viele Fotos gemacht.\": \"This sentence is correct.\",\n  \"Danach haben wir in einem Restaurant gegessen, das Essen war sehr lecker.\": \"This sentence is correct.\",\n  \"Später sind wir zum Alexanderplatz gegangen.\": \"This sentence is correct.\",\n  \"Es war ein sehr schöne Tag, aber ich war am Ende ein bisschen müde.\": \"'Schöne' should be 'schöner' to agree with 'Tag' in the nominative case, so it should be 'ein sehr schöner Tag.'\"\n}"},
+          {text: "input: Hier, je suis allée à Marseille avec mon amis. Nous avons exploré le Vieux-Port et avons pris beaucoup de photo. Ensuite, nous avons mangé dans une brasserie, les plats était délicieux. Après, nous sommes allés au Musée des Civilisations de l'Europe et de la Méditerranée. C'était une expérience très intéressant, mais je suis très fatiguée ce soir."},
+          {text: "output: {\n  \"Hier, je suis allée à Marseille avec mon amis.\": \"'Mon amis' should be 'mon ami' because 'ami' is singular. If you mean multiple friends, it should be 'mes amis.'\",\n  \"Nous avons exploré le Vieux-Port et avons pris beaucoup de photo.\": \"'Beaucoup de photo' should be 'beaucoup de photos' because 'photos' is plural.\",\n  \"Ensuite, nous avons mangé dans une brasserie, les plats était délicieux.\": \"'Était' should be 'étaient' to agree with the plural noun 'plats,' so it should be 'les plats étaient délicieux.'\",\n  \"Après, nous sommes allés au Musée des Civilisations de l'Europe et de la Méditerranée.\": \"This sentence is correct.\",\n  \"C'était une expérience très intéressant, mais je suis très fatiguée ce soir.\": \"'Intéressant' should be 'intéressante' to agree with 'expérience,' which is feminine.\"\n}"},
+          {text: "input: " + message},
+          {text: "output: "},
+        ];
+      
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts }],
+          generationConfig,
+       // safetySettings: Adjust safety settings
+       // See https://ai.google.dev/gemini-api/docs/safety-settings
+        });
+        return result.response.text();
+      }
 }
 
 export const mapLanguageNameToObject = (languageName) => {
@@ -291,4 +330,115 @@ export const countValidUserMessages = (messages) => {
     
     // Return the count of valid user messages
     return validUserMessages.length;
+}
+
+export const getMessageWordsPerMinute = (audioBuffer, messageText) => {
+    const words = messageText.split(" ");
+    const minutes = audioBuffer.duration / 60;
+    return words.length / minutes;
+}
+
+export const getAudioBuffer = async audio => {
+    // Step 1: Ensure the audio is loaded
+    if (!audio.src) {
+        throw new Error('Audio source is not provided');
+    }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const response = await fetch(audio.src);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    return audioBuffer;
+}
+
+export const analyzeSilence = (audioBuffer) => {
+    // Step 2: Analyze the audio data
+    const channelData = audioBuffer.getChannelData(0); // Use the first channel for mono audio
+    const sampleRate = audioBuffer.sampleRate;
+    const threshold = 0.01; // Amplitude threshold for silence
+    const minSilenceDuration = 0.2; // Minimum duration of silence in seconds to consider as a pause
+
+    let silenceDuration = 0;
+    let speechDuration = 0;
+    let isSilent = false;
+    let silenceStart = 0;
+
+    for (let i = 0; i < channelData.length; i++) {
+        const currentTime = i / sampleRate;
+        const amplitude = Math.abs(channelData[i]);
+
+        if (amplitude < threshold) {
+            if (!isSilent) {
+                isSilent = true;
+                silenceStart = currentTime;
+            }
+        } else {
+            if (isSilent) {
+                const duration = currentTime - silenceStart;
+                if (duration >= minSilenceDuration) {
+                    silenceDuration += duration;
+                } else {
+                    speechDuration += duration; // Short silences considered as part of speech
+                }
+                isSilent = false;
+            }
+            speechDuration += 1 / sampleRate;
+        }
+    }
+
+    // If the last segment was silent
+    if (isSilent) {
+        const duration = audioBuffer.duration - silenceStart;
+        silenceDuration += duration;
+    }
+
+    const silencePercentage = (silenceDuration / (silenceDuration + speechDuration)) * 100;
+    const speechPercentage = 100 - silencePercentage;
+
+    console.log(`Total Silence Duration: ${silenceDuration.toFixed(2)} seconds`);
+    console.log(`Total Speech Duration: ${speechDuration.toFixed(2)} seconds`);
+    console.log(`${silencePercentage.toFixed(2)}% silence, ${speechDuration.toFixed(2)}% speech`)
+
+    return { silenceDuration, speechDuration, silencePercentage, speechPercentage };
+}
+
+const getWordsUniqueness = prompt => {
+    /**
+     * Returns the unique words per word of a user message out of 100
+     * meaning that if every word that the user says is unique
+     * the score would be 100
+     * but if the user uses the same word ever time
+     * the score would be 1
+     * 
+     * @param {string} prompt The user message
+    */
+    const words = message.split(" ");
+    const uniqueWords = new Set(words);
+    return (uniqueWords.length / words.length) * 100;
+}
+
+const getMostCommonWords = userMessages => {
+    /**
+     * Returns the ordered array of used words
+     * where each word contains the word and a count of uses
+     * 
+     * @param {array} userMessages an array of all user messages in the conversation
+    */
+    const wordsUsed = [];
+    for (const message of userMessages) {
+        words = message.split(" ");
+        wordsUsed.append(...words);
+    }
+    const wordCount = {};
+
+    words.forEach(word => {
+        wordCount[word] = (wordCount[word] || 0) + 1;
+    });
+
+    // Convert the object into an array of [word, count] pairs
+    const wordCountArray = Object.entries(wordCount);
+
+    // Sort the array by word order (alphabetically)
+    wordCountArray.sort((a, b) => a[0].localeCompare(b[0]));
+    return wordCountArray;
 }
