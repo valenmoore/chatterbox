@@ -14,7 +14,7 @@ const ChatBubble = ({ message, translateFunction, language, blurred, isUser = tr
                 translated.charAt(0).toUpperCase() + translated.slice(1) : 
                 translated.toLowerCase()
             element.innerHTML = translated + " ";
-            element.style += "translated";
+            element.classList += "translated";
         }
     }
     const getWordIndex = (fullString, startIndex) => {
@@ -29,54 +29,58 @@ const ChatBubble = ({ message, translateFunction, language, blurred, isUser = tr
         const selectedText = selection.replace(/\&nbsp;/g, '');
     
         // Extract words from spans
-        const fullSplitText = Array.from(target.children)
-            .filter((child) => child.tagName.toLowerCase() === 'span')
-            .map((span) => ({
-                text: span.innerHTML.replace("/n", "").replace("&nbsp;", ""),
-                isTranslated: span.classList.contains("translated")
-            }));
-    
+        const fullChildren = Array.from(target.children)
+            .filter((child) => child.tagName.toLowerCase() === 'span');
+        const fullSplitText = [];
+        
+        for (const span of fullChildren) {
+            const text = span.innerHTML.replace("/n", "").replace("&nbsp;", "").replace("  ", " ");
+            console.log(text);
+            if (text !== " " && text !== "  " && text !== "   ") {
+                fullSplitText.push({
+                    text,
+                    isTranslated: span.classList.contains("translated"),
+                    newTranslated: false
+                })
+            }
+        };
+
         // Find start and end indices of selected text
         const startIndex = target.innerText.indexOf(selectedText);
         const endIndex = startIndex + selectedText.length;
-        console.log("start", startIndex, "end", endIndex)
-    
+
         // Extract the full highlighted chunk as a substring of the full text
         let textChunk = target.innerText.substring(startIndex, endIndex).trim();
-        console.log("chunk", textChunk);
     
         const beginningWordIndex = getWordIndex(target.innerText, startIndex);
         const finalWordIndex = getWordIndex(target.innerText, endIndex) + 1;
-
-        console.log()
         
         const words = target.innerText.split(" ");
         const translateText = words.slice(beginningWordIndex, finalWordIndex).join(" ");
-        console.log("text", translateText)
         // Translate the selected text
         const result = await translateFunction(language.abrev, "en", translateText);
     
         // Split translation into words
         const splitResult = result.split(" ");
+        console.log(fullSplitText[beginningWordIndex], fullSplitText[finalWordIndex])
     
         // Replace old language version of selected text with translated text
-        fullSplitText.splice(beginningWordIndex, finalWordIndex - beginningWordIndex, ...splitResult.map((word) => ({ text: word + " ", isTranslated: true })));
+        fullSplitText.splice(beginningWordIndex, finalWordIndex - beginningWordIndex, ...splitResult.map((word) => ({ text: word + " ", isTranslated: true, newTranslated: true })));
     
         // Reset the target element
         target.innerHTML = '';
     
         // Create spans for each word in the text
-        fullSplitText.forEach(({ text, isTranslated }) => {
+        fullSplitText.forEach(({ text, isTranslated, newTranslated }) => {
             if (text.trim()) {
                 const span = document.createElement("span");
                 span.innerHTML = text;
                 if (isTranslated) span.classList.add("translated");
+                if (newTranslated) span.classList.add("new")
                 span.addEventListener("click", translateWord)
                 target.appendChild(span);
             }
         });
-    
-        console.log(result);
     };
     
     const handleSelection = (e) => {

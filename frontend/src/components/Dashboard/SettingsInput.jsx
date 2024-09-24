@@ -17,7 +17,8 @@ const SettingsInput = () => {
         const aiName = e.target.elements['name-input'].value;
         const chatType = e.target.elements['chat-type'].value;
         const gender = "NEUTRAL";
-        navigate('/' + chatType, { state: { languageName, scenario, speed, aiName, gender, blurMessages: true } });
+        const blur = e.target.elements['blur-input'].value;
+        navigate('/' + chatType, { state: { languageName, scenario, speed, aiName, gender, blurMessages: blur } });
     }
     return (
         <>
@@ -37,6 +38,8 @@ const SettingsInput = () => {
                 {/* TODO: add randomize button for situation */}
                 <label htmlFor='speed-input'>Speed: </label>
                 <input name='speed-input' type='range' min={0.25} max={2} defaultValue={1} step={0.1}></input>
+                <label htmlFor='blur-input'>Blur messages: </label>
+                <input name='blur-input' type='checkbox'></input>
                 <button type='submit'>Go</button>
             </form>
         </>

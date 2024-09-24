@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Microphone from '../svgs/Microphone';
 
-const Input = ({ handlePrompt, language, inputStyle }) => {
+const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHeight }) => {
     const [inputValue, setInputValue] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [audioChunks, setAudioChunks] = useState([]);
+    const textareaRef = useRef(null);
 
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const [recognition] = useState(new SpeechRecognition());
@@ -43,10 +45,12 @@ const Input = ({ handlePrompt, language, inputStyle }) => {
     }, [recognition]);
 
     useEffect(() => {
-        const input = document.querySelector("textarea");
-        if (input) {
-            input.style.height = 'inherit';
-            input.style.height = `${input.scrollHeight}px`;
+        // Adjust parent height based on the content of the textarea
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto'; // Reset height to calculate new height
+            textarea.style.height = `${textarea.scrollHeight}px`;
+            setParentHeight(`${textarea.scrollHeight}px`);
         }
     }, [inputValue]);
 
@@ -56,20 +60,22 @@ const Input = ({ handlePrompt, language, inputStyle }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        recognition.stop();
-        if (mediaRecorder) {
-            mediaRecorder.stop();
+        if (!isAudioPlaying) {
+            e.preventDefault();
+            recognition.stop();
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+            }
+            setIsRecording(false);
+            setInputValue(''); // Clear input after submission
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            if (currentText !== "") {
+                handlePrompt(currentText, audio);
+            } else handlePrompt(inputValue, audio)
+            setAudioChunks([]); // Clear the chunks after processing
         }
-        setIsRecording(false);
-        setInputValue(''); // Clear input after submission
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        if (currentText !== "") {
-            handlePrompt(currentText, audio);
-        } else handlePrompt(inputValue, audio)
-        setAudioChunks([]); // Clear the chunks after processing
     };
 
     const startRecording = () => {
@@ -91,21 +97,31 @@ const Input = ({ handlePrompt, language, inputStyle }) => {
 
     return (
         <>
-            <form onSubmit={handleSubmit} style={inputStyle}>
+            <form onSubmit={handleSubmit} style={inputStyle} className='input-form'>
                 <button
                     type="button"
                     className={isRecording ? "recording" : ""}
                     onClick={startRecording}
                 >
-                    Record
+                    <Microphone />
                 </button>
-                <input
+                {/*<input
                     onKeyDown={handleKey}
                     placeholder='Enter your message...'
                     value={inputValue}
                     onChange={handleChange}
+                />*/}
+                <textarea
+                    ref={textareaRef}
+                    value={inputValue}
+                    onKeyDown={handleKey}
+                    onChange={handleChange}
+                    style={{
+                        boxSizing: 'border-box',
+                        overflow: 'hidden', // Hide scrollbar as the height is auto-adjusting
+                    }}
                 />
-                <button type="submit">Send</button>
+                <button disabled={isAudioPlaying} type="submit">Send</button>
             </form>
         </>
     );

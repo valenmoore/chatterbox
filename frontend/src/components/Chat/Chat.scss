@@ -1,5 +1,7 @@
 #root {
     height: 100vh;
+    --user-bubble-color: rgb(24, 154, 223);
+    --ai-bubble-color: rgb(238, 98, 59);
 }
 
 .chat-container {
@@ -11,8 +13,6 @@
     padding: var(--padding);
 
     .chat-messages {
-        --user-bubble-color: rgb(27, 140, 209);
-        --ai-bubble-color: rgb(238, 98, 59);
         display: flex;
         flex-direction: column;
         overflow-y: scroll;
@@ -25,6 +25,20 @@
             position: relative;
             span {
                 transition: filter 0.5s;
+            }
+            span.translated {
+                font-weight: bold;
+            }
+            span.translated.new {
+                animation: reveal 0.5s forwards;
+            }
+            @keyframes reveal {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
             }
         }
         .chat-bubble.ai {
@@ -44,6 +58,47 @@
             width: 100%;
             input {
                 width: 70%;
+            }
+        }
+    }
+}
+
+.chat-window {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    .user-side, .ai-side {
+        display: flex;
+        flex-direction: column-reverse;
+        --full-height: 8vh;
+        --padding: 2vh;
+        .chat-bubble {
+            min-height: var(--full-height);
+            width: 100%;
+            background-color: var(--user-bubble-color);
+            padding: var(--padding);
+            border-radius: 1em;
+        }
+    }
+
+    .user-side {
+        .chat-bubble {
+            .input-form {
+                display: flex;
+                button {
+                    max-height: calc(var(--full-height));
+                    max-width: calc(var(--full-height));
+                    svg {
+                        display: flex;
+                        height: calc(var(--full-height) / 2);
+                        width: calc(var(--full-height) / 2);
+                        path {
+                            stroke: white;
+                        }
+                    }
+                }
+                text-area {
+                    min-height: calc(var(--full-height) - var(--padding));
+                }
             }
         }
     }

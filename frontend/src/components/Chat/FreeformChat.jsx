@@ -1,6 +1,10 @@
 import { FC, useState, useEffect } from 'react';
 import ChatBubble from './ChatBubble';
-import Input from './Input'
+import Input from './Input';
+import ChatWindow from './ChatWindow';
+import UserChatBubble from './UserChatBubble';
+import AIChatBubble from './AIChatBubble';
+import Avatar from '../Avatar/Avatar';
 import translate from "translate";
 /*import LanguageDetect from 'languagedetect';
 const lngDetector = new LanguageDetect();*/
@@ -12,6 +16,7 @@ const Chat = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const params = location.state;
+
     useEffect(() => {
         if (!params || !isValidParameters(params)) {
           navigate("/dashboard");
@@ -34,6 +39,8 @@ const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [userMessageStats, setUserMessageStats] = useState([]);
     const [conversationHistory, setConversationHistory] = useState([]);
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
     const translateText = async (from, to, text) => {
         console.log(from, to, text)
         const result = await translate(text, { to, from });
@@ -106,6 +113,11 @@ const Chat = () => {
 
     const playAudio = (audio) => {
         const sound = new Audio(`data:audio/mp3;base64,${audio.audioContent}`);
+        // When the audio starts playing, set the state to true
+        sound.onplay = () => setIsAudioPlaying(true);
+
+        // When the audio ends, set the state to false
+        sound.onended = () => setIsAudioPlaying(false);
         sound.play();
     }
 
@@ -159,19 +171,18 @@ const Chat = () => {
 
     return (
         <div className="chat-container">
-            <div className="chat-messages">
-                {messages.map((message, index) => {
-                    if (!message.isDummy) {
-                        return (
-                            <ChatBubble key={index} message={message.content} language={language} translateFunction={translateText} isUser={message.role === "user"} blurred={params.blurMessages} />
-                        );
-                    }
-                    return null;
-                })}
+            <div className="chat-window">
+                <div className="user-side">
+                    <Avatar />
+                    <UserChatBubble handlePrompt={handleSendPrompt} language={language} isAudioPlaying={isAudioPlaying} />
+                </div>
+                <div className="ai-side">
+
+                </div>
             </div>
-            <div className="input-container">
-                <Input handlePrompt={handleSendPrompt} language={language} />
-            </div>
+            {/*<div className="input-container">
+                <Input handlePrompt={handleSendPrompt} language={language} isAudioPlaying={isAudioPlaying} />
+            </div>*/}
         </div>
     );
 };
