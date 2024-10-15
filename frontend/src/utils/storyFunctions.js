@@ -1,7 +1,7 @@
 import { getDoc, updateDoc } from 'firebase/firestore'
 import { currentLanguage } from '../constants/constants'
 import { collection, addDoc, query, where, getDocs, setDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase'; // Ensure Firebase is initialized
+import { db } from '../firebase';
 import peopleData from '../constants/peopleData'
 import placeData from '../constants/placeData'
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Microphone from '../svgs/Microphone';
+// import Microphone from '../svgs/Microphone';
 
 const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHeight }) => {
     const [inputValue, setInputValue] = useState('');
@@ -52,21 +52,27 @@ const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHe
             textarea.style.height = `${textarea.scrollHeight}px`;
             setParentHeight(`${textarea.scrollHeight}px`);
         }
-    }, [inputValue]);
+    }, [inputValue, window.innerWidth]);
 
     const handleChange = (e) => {
         e.preventDefault();
         setInputValue(e.target.value);
     };
 
-    const handleSubmit = async (e) => {
-        if (!isAudioPlaying) {
-            e.preventDefault();
+    const stopRecording = () => {
+        if (isRecording) {
             recognition.stop();
             if (mediaRecorder) {
                 mediaRecorder.stop();
             }
             setIsRecording(false);
+        }
+    }
+
+    const handleSubmit = async (e) => {
+        if (!isAudioPlaying && inputValue !== '') {
+            e.preventDefault();
+            stopRecording();
             setInputValue(''); // Clear input after submission
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const audioUrl = URL.createObjectURL(audioBlob);
@@ -75,6 +81,7 @@ const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHe
                 handlePrompt(currentText, audio);
             } else handlePrompt(inputValue, audio)
             setAudioChunks([]); // Clear the chunks after processing
+            setInputValue('');
         }
     };
 
@@ -100,10 +107,10 @@ const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHe
             <form onSubmit={handleSubmit} style={inputStyle} className='input-form'>
                 <button
                     type="button"
-                    className={isRecording ? "recording" : ""}
-                    onClick={startRecording}
+                    className={isRecording ? "mic recording" : "mic"}
+                    onClick={isRecording ? stopRecording : startRecording}
                 >
-                    <Microphone />
+                    <img src="/microphone.svg" />
                 </button>
                 {/*<input
                     onKeyDown={handleKey}
@@ -112,6 +119,7 @@ const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHe
                     onChange={handleChange}
                 />*/}
                 <textarea
+                    className='input'
                     ref={textareaRef}
                     value={inputValue}
                     onKeyDown={handleKey}
@@ -121,7 +129,9 @@ const Input = ({ handlePrompt, language, inputStyle, isAudioPlaying, setParentHe
                         overflow: 'hidden', // Hide scrollbar as the height is auto-adjusting
                     }}
                 />
-                <button disabled={isAudioPlaying} type="submit">Send</button>
+                <button disabled={isAudioPlaying} type="submit">
+                    <img src="/send.svg" />
+                </button>
             </form>
         </>
     );

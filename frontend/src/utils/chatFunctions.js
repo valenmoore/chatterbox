@@ -1,6 +1,7 @@
 import translate from "translate";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { languageMap } from '../constants/constants';
+import { updateDoc, getDoc, arrayUnion } from "firebase/firestore";
 import model from "../gemini";
 
 
@@ -34,7 +35,7 @@ export const getAiResponse = async (prompt, messages) => {
     });
     const result = await chat.sendMessage(prompt);
     return result.response.text()
-} 
+}
 
 export const screenMessage = async (message, conversationMission) => {
     /**
@@ -402,22 +403,27 @@ export const analyzeSilence = (audioBuffer) => {
     return { silenceDuration, speechDuration, silencePercentage, speechPercentage };
 }
 
-const getWordsUniqueness = prompt => {
+export const getWordsUniqueness = userMessages => {
     /**
      * Returns the unique words per word of a user message out of 100
      * meaning that if every word that the user says is unique
      * the score would be 100
      * but if the user uses the same word ever time
      * the score would be 1
+     * also returns num of unique words used
      * 
-     * @param {string} prompt The user message
+     * @param {array} prompt an array of all user messages in the conversation
     */
-    const words = message.split(" ");
+    const words = [];
+    for (const message of userMessages) {
+        words.push(...message.split(" "));
+    }
     const uniqueWords = new Set(words);
-    return (uniqueWords.length / words.length) * 100;
+    console.log(uniqueWords.size, words.length);
+    return {percent: (uniqueWords.size / words.length) * 100, numUnique: uniqueWords.size};
 }
 
-const getMostCommonWords = userMessages => {
+export const getMostCommonWords = userMessages => {
     /**
      * Returns the ordered array of used words
      * where each word contains the word and a count of uses
@@ -426,12 +432,12 @@ const getMostCommonWords = userMessages => {
     */
     const wordsUsed = [];
     for (const message of userMessages) {
-        words = message.split(" ");
-        wordsUsed.append(...words);
+        const words = message.split(" ");
+        wordsUsed.push(...words);
     }
     const wordCount = {};
 
-    words.forEach(word => {
+    wordsUsed.forEach(word => {
         wordCount[word] = (wordCount[word] || 0) + 1;
     });
 
@@ -441,4 +447,39 @@ const getMostCommonWords = userMessages => {
     // Sort the array by word order (alphabetically)
     wordCountArray.sort((a, b) => a[0].localeCompare(b[0]));
     return wordCountArray;
+}
+
+export const createSave = async (userDoc, language) => {
+    try {
+        const docSnap = await getDoc(userDoc);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const saves = data.saves || [];
+    
+          // The index of the new item will be the current length of the saves array
+          const newSaveIndex = saves.length;
+    
+          // Add the new save to the saves array
+          await updateDoc(userDoc, {
+            saves: arrayUnion({
+              language: language,
+              streak: 0,
+              averages: {
+                wpms: [],
+                understandings: [],
+                speeds: [],
+              }
+            })
+          });
+    
+          console.log(`Save added at index ${newSaveIndex}`);
+          return newSaveIndex;
+        } else {
+          console.error("No such document!");
+          return null;
+        }
+      } catch (error) {
+        console.error("Error adding save: ", error);
+      }
 }

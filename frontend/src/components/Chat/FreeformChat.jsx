@@ -2,20 +2,26 @@ import { FC, useState, useEffect } from 'react';
 import ChatBubble from './ChatBubble';
 import Input from './Input';
 import ChatWindow from './ChatWindow';
+import Skyline from '../svgs/Skyline';
 import UserChatBubble from './UserChatBubble';
 import AIChatBubble from './AIChatBubble';
 import Avatar from '../Avatar/Avatar';
 import translate from "translate";
 /*import LanguageDetect from 'languagedetect';
 const lngDetector = new LanguageDetect();*/
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { languageMap } from '../../constants/constants'
-import { getAiResponse, getAudioBuffer, getMessageWordsPerMinute, analyzeSilence } from '../../utils/chatFunctions';
+import { getAiResponse, getAudioBuffer, getMessageWordsPerMinute, getWordsUniqueness, getMostCommonWords } from '../../utils/chatFunctions';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import useFirebaseAuth from '../../hooks/useAuth';
 
 const Chat = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const params = location.state;
+    const { index } = useParams();
+    const userProfile = useFirebaseAuth();
 
     useEffect(() => {
         if (!params || !isValidParameters(params)) {
@@ -37,9 +43,10 @@ const Chat = () => {
         ]);
     }, []);
     const [messages, setMessages] = useState([]);
-    const [userMessageStats, setUserMessageStats] = useState([]);
+    const [conversationStats, setConversationStats] = useState({translations: {}, wordUniqueness: null, mostCommonWords: [], messageStats: []});
     const [conversationHistory, setConversationHistory] = useState([]);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    const [aiMessage, setAiMessage] = useState(null);
 
     const translateText = async (from, to, text) => {
         console.log(from, to, text)
@@ -85,7 +92,7 @@ const Chat = () => {
 
     // const language = { full: "french", abrev: "fr", bcp: "fr-FR" };
     const tts = async (text) => {
-        const key = "AIzaSyDDUJ-ottb6mDzb2Ce2PNgIuh1DBD02aFc"
+        const key = import.meta.env.VITE_TTS_KEY
         const endpoint = `https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=${key}`
         const payload = {
             "audioConfig": {
@@ -129,11 +136,11 @@ const Chat = () => {
     const handleMessageStat = async (prompt, audio) => {
         const buffer = await getAudioBuffer(audio);
         const wpm = getMessageWordsPerMinute(buffer, prompt);
-        const silence = analyzeSilence(buffer);
-        console.log(wpm)
-        console.log(silence)
-        const messageStat = { text: prompt, audio: audio };
-        setUserMessageStats(prev => [...prev, messageStat]);
+        // const silence = analyzeSilence(buffer);
+        const messageStat = { text: prompt,audio: JSON.stringify(audio), wpm };
+        const prevStats = conversationStats.messageStats;
+        prevStats.push(messageStat);
+        setConversationStats({...conversationStats, messageStats: prevStats});
     }
 
     const handleSendPrompt = async (prompt, audio, isDummy=false) => {
@@ -168,6 +175,31 @@ const Chat = () => {
         }
     };
 
+    useEffect(() => {
+        if (messages.length > 0) {
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if (messages[i].role === "model") {
+                    console.log(messages[i].content)
+                    setAiMessage(messages[i].content);
+                    break;
+                }
+            }
+        }
+    }, [messages])
+
+    const endConversation = async () => {
+        const userMessages = messages.map(m => m.role === "user" ? m.content : undefined).filter(m => m !== undefined);
+        console.log(userMessages)
+        const temp = [];
+        for (const m of conversationStats.messageStats) {
+            temp.push({wpm: m.wpm});
+        }
+        const docRef = doc(db, "users", userProfile.user?.uid);
+        const docSnap = (await getDoc(docRef)).data();
+        const conversationIndex = docSnap.saves[index].averages.wpms.length;
+        setConversationStats({...conversationStats, speed: params.speed});
+        navigate('/saves/' + index + '/chat-recap', { state: { userMessageStats: conversationStats, messages, messageStats: temp, wordUniqueness: getWordsUniqueness(userMessages), mostCommonWords: getMostCommonWords(userMessages), languageName: params.languageName, convoIndex: conversationIndex } });
+    }
 
     return (
         <div className="chat-container">
@@ -177,12 +209,15 @@ const Chat = () => {
                     <UserChatBubble handlePrompt={handleSendPrompt} language={language} isAudioPlaying={isAudioPlaying} />
                 </div>
                 <div className="ai-side">
-
+                    <Avatar />
+                    <AIChatBubble message={aiMessage} language={language} translateFunction={translateText} conversationStats={conversationStats} setConversationStats={setConversationStats} blurred={true} />
                 </div>
             </div>
             {/*<div className="input-container">
                 <Input handlePrompt={handleSendPrompt} language={language} isAudioPlaying={isAudioPlaying} />
             </div>*/}
+            <div onClick={endConversation} className="end-btn"><img src="/hand-waving.svg" /><div className='end-txt'>End conversation</div></div>
+            <div className="background"><Skyline /><div className="color"></div></div>
         </div>
     );
 };

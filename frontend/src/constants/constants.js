@@ -3,7 +3,7 @@
     abrev: string;
     bcp: string;
 }*/
-export const languageMap =  {
+/*export const languageMap =  {
     "afrikaans": {
       "full": "Afrikaans",
       "abrev": "af",
@@ -324,7 +324,305 @@ export const languageMap =  {
       "abrev": "ja",
       "bcp": "ja-JP"
     }
-  };
+  };*/
+
+export const languageMap = {
+  "afrikaans": {
+    "full": "Afrikaans",
+    "abrev": "af",
+    "bcp": "af-ZA"
+  },
+  "amharic": {
+    "full": "Amharic",
+    "abrev": "am",
+    "bcp": "am-ET"
+  },
+  "arabic": {
+    "full": "Arabic",
+    "abrev": "ar",
+    "bcp": "ar-XA"
+  },
+  "bulgarian": {
+    "full": "Bulgarian",
+    "abrev": "bg",
+    "bcp": "bg-BG"
+  },
+  "bengali": {
+    "full": "Bengali",
+    "abrev": "bn",
+    "bcp": "bn-IN"
+  },
+  "catalan": {
+    "full": "Catalan",
+    "abrev": "ca",
+    "bcp": "ca-ES"
+  },
+  "chinese_mandarin_cn": {
+    "full": "Chinese (Mandarin, Simplified)",
+    "abrev": "cmn",
+    "bcp": "cmn-CN"
+  },
+  "chinese_mandarin_tw": {
+    "full": "Chinese (Mandarin, Traditional)",
+    "abrev": "cmn",
+    "bcp": "cmn-TW"
+  },
+  "czech": {
+    "full": "Czech",
+    "abrev": "cs",
+    "bcp": "cs-CZ"
+  },
+  "danish": {
+    "full": "Danish",
+    "abrev": "da",
+    "bcp": "da-DK"
+  },
+  "german": {
+    "full": "German",
+    "abrev": "de",
+    "bcp": "de-DE"
+  },
+  "greek": {
+    "full": "Greek",
+    "abrev": "el",
+    "bcp": "el-GR"
+  },
+  "english_au": {
+    "full": "English (Australia)",
+    "abrev": "en",
+    "bcp": "en-AU"
+  },
+  "english_gb": {
+    "full": "English (United Kingdom)",
+    "abrev": "en",
+    "bcp": "en-GB"
+  },
+  "english_in": {
+    "full": "English (India)",
+    "abrev": "en",
+    "bcp": "en-IN"
+  },
+  "english_us": {
+    "full": "English (United States)",
+    "abrev": "en",
+    "bcp": "en-US"
+  },
+  "spanish_es": {
+    "full": "Spanish (Spain)",
+    "abrev": "es",
+    "bcp": "es-ES"
+  },
+  "spanish_us": {
+    "full": "Spanish (United States)",
+    "abrev": "es",
+    "bcp": "es-US"
+  },
+  "basque": {
+    "full": "Basque",
+    "abrev": "eu",
+    "bcp": "eu-ES"
+  },
+  "finnish": {
+    "full": "Finnish",
+    "abrev": "fi",
+    "bcp": "fi-FI"
+  },
+  "filipino": {
+    "full": "Filipino",
+    "abrev": "fil",
+    "bcp": "fil-PH"
+  },
+  "french_ca": {
+    "full": "French (Canada)",
+    "abrev": "fr",
+    "bcp": "fr-CA"
+  },
+  "french_fr": {
+    "full": "French (France)",
+    "abrev": "fr",
+    "bcp": "fr-FR"
+  },
+  "galician": {
+    "full": "Galician",
+    "abrev": "gl",
+    "bcp": "gl-ES"
+  },
+  "gujarati": {
+    "full": "Gujarati",
+    "abrev": "gu",
+    "bcp": "gu-IN"
+  },
+  "hebrew": {
+    "full": "Hebrew",
+    "abrev": "he",
+    "bcp": "he-IL"
+  },
+  "hindi": {
+    "full": "Hindi",
+    "abrev": "hi",
+    "bcp": "hi-IN"
+  },
+  "hungarian": {
+    "full": "Hungarian",
+    "abrev": "hu",
+    "bcp": "hu-HU"
+  },
+  "indonesian": {
+    "full": "Indonesian",
+    "abrev": "id",
+    "bcp": "id-ID"
+  },
+  "icelandic": {
+    "full": "Icelandic",
+    "abrev": "is",
+    "bcp": "is-IS"
+  },
+  "italian": {
+    "full": "Italian",
+    "abrev": "it",
+    "bcp": "it-IT"
+  },
+  "japanese": {
+    "full": "Japanese",
+    "abrev": "ja",
+    "bcp": "ja-JP"
+  },
+  "kannada": {
+    "full": "Kannada",
+    "abrev": "kn",
+    "bcp": "kn-IN"
+  },
+  "korean": {
+    "full": "Korean",
+    "abrev": "ko",
+    "bcp": "ko-KR"
+  },
+  "lithuanian": {
+    "full": "Lithuanian",
+    "abrev": "lt",
+    "bcp": "lt-LT"
+  },
+  "latvian": {
+    "full": "Latvian",
+    "abrev": "lv",
+    "bcp": "lv-LV"
+  },
+  "malayalam": {
+    "full": "Malayalam",
+    "abrev": "ml",
+    "bcp": "ml-IN"
+  },
+  "marathi": {
+    "full": "Marathi",
+    "abrev": "mr",
+    "bcp": "mr-IN"
+  },
+  "malay": {
+    "full": "Malay",
+    "abrev": "ms",
+    "bcp": "ms-MY"
+  },
+  "norwegian": {
+    "full": "Norwegian",
+    "abrev": "nb",
+    "bcp": "nb-NO"
+  },
+  "dutch_be": {
+    "full": "Dutch (Belgium)",
+    "abrev": "nl",
+    "bcp": "nl-BE"
+  },
+  "dutch_nl": {
+    "full": "Dutch (Netherlands)",
+    "abrev": "nl",
+    "bcp": "nl-NL"
+  },
+  "punjabi": {
+    "full": "Punjabi",
+    "abrev": "pa",
+    "bcp": "pa-IN"
+  },
+  "polish": {
+    "full": "Polish",
+    "abrev": "pl",
+    "bcp": "pl-PL"
+  },
+  "portuguese_br": {
+    "full": "Portuguese (Brazil)",
+    "abrev": "pt",
+    "bcp": "pt-BR"
+  },
+  "portuguese_pt": {
+    "full": "Portuguese (Portugal)",
+    "abrev": "pt",
+    "bcp": "pt-PT"
+  },
+  "romanian": {
+    "full": "Romanian",
+    "abrev": "ro",
+    "bcp": "ro-RO"
+  },
+  "russian": {
+    "full": "Russian",
+    "abrev": "ru",
+    "bcp": "ru-RU"
+  },
+  "slovak": {
+    "full": "Slovak",
+    "abrev": "sk",
+    "bcp": "sk-SK"
+  },
+  "serbian": {
+    "full": "Serbian",
+    "abrev": "sr",
+    "bcp": "sr-RS"
+  },
+  "swedish": {
+    "full": "Swedish",
+    "abrev": "sv",
+    "bcp": "sv-SE"
+  },
+  "tamil": {
+    "full": "Tamil",
+    "abrev": "ta",
+    "bcp": "ta-IN"
+  },
+  "telugu": {
+    "full": "Telugu",
+    "abrev": "te",
+    "bcp": "te-IN"
+  },
+  "thai": {
+    "full": "Thai",
+    "abrev": "th",
+    "bcp": "th-TH"
+  },
+  "turkish": {
+    "full": "Turkish",
+    "abrev": "tr",
+    "bcp": "tr-TR"
+  },
+  "ukrainian": {
+    "full": "Ukrainian",
+    "abrev": "uk",
+    "bcp": "uk-UA"
+  },
+  "urdu": {
+    "full": "Urdu",
+    "abrev": "ur",
+    "bcp": "ur-IN"
+  },
+  "vietnamese": {
+    "full": "Vietnamese",
+    "abrev": "vi",
+    "bcp": "vi-VN"
+  },
+  "chinese_cantonese": {
+    "full": "Chinese (Cantonese)",
+    "abrev": "yue",
+    "bcp": "yue-HK"
+  }
+}
 
 export const languageArray = [
 "afrikaans",
@@ -454,3 +752,16 @@ export const examQuestions = [
 ]
 
 export const currentLanguage = "french";
+
+export const languageSpeedData = {
+  "japanese": 240,
+  "spanish": 260,
+  "french": 220,
+  "italian": 210,
+  "portuguese": 230,
+  "chinese,-mandarin": 200,
+  "korean": 220,
+  "vietnamese": 190,
+  "turkish": 210,
+  "hindi": 210
+}

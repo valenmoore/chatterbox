@@ -1,16 +1,92 @@
 #root {
     height: 100vh;
-    --user-bubble-color: rgb(24, 154, 223);
-    --ai-bubble-color: rgb(238, 98, 59);
+    --user-bubble-color: var(--orange);
+    --ai-bubble-color: var(--pink);
 }
 
 .chat-container {
-    --padding: 1.5em;
-    height: calc(100% - 2 * var(--padding));
-    width: calc(100% - 2 * var(--padding));
-    display: grid;
-    grid-template-rows: 8fr 1fr;
-    padding: var(--padding);
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    z-index: 0;
+
+    .end-btn {
+        width: 50px;
+        height: 50px;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        border-radius: 10px;
+        background-color: var(--orange);
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        transition: width 0.5s;
+        overflow: hidden;
+        white-space: nowrap;
+        img {
+            width: 40px;
+        }
+
+        .end-txt {
+            display: none;
+            opacity: 0;
+            font-weight: bold;
+            color: var(--navy);
+        }
+    }
+
+    .end-btn:hover {
+        width: 200px;
+        .end-txt {
+            display: block;
+            opacity: 1;
+        }
+    }
+
+    .background {
+        position: absolute;
+        height: 100%;
+        left: 0;
+        top: 0;
+        width: 100%;
+        z-index: -1;
+        overflow: hidden;
+        .color {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: var(--navy);
+            z-index: -2;
+        }
+        img {
+            position: absolute;
+            bottom: 0;
+        }
+        svg {
+            display: block;
+            position: absolute;
+            bottom: -200px;
+            g {
+                fill: var(--purple);
+            }
+
+            #back {
+                // opacity: 0.25;
+                fill: rgb(72, 21, 111);
+            }
+            #mid {
+                // opacity: 0.5;
+                fill: rgb(51, 5, 86);
+            }
+            #front {
+                // opacity: 0.75;
+                fill: rgb(35, 3, 60);
+            }
+        }
+    }
 
     .chat-messages {
         display: flex;
@@ -31,14 +107,6 @@
             }
             span.translated.new {
                 animation: reveal 0.5s forwards;
-            }
-            @keyframes reveal {
-                from {
-                    opacity: 0;
-                }
-                to {
-                    opacity: 1;
-                }
             }
         }
         .chat-bubble.ai {
@@ -64,18 +132,23 @@
 }
 
 .chat-window {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    padding: 0 10vw;
+    width: calc(100% - 20vw);
+    height: 100%;
     .user-side, .ai-side {
         display: flex;
         flex-direction: column-reverse;
-        --full-height: 8vh;
-        --padding: 2vh;
+        width: 50%;
+        --full-height: 6vh;
+        --bubble-padding: 2vh;
         .chat-bubble {
+            margin-bottom: var(--bubble-padding);
+            width: 80%;
             min-height: var(--full-height);
-            width: 100%;
+            max-height: 50%;
             background-color: var(--user-bubble-color);
-            padding: var(--padding);
+            padding: var(--bubble-padding);
             border-radius: 1em;
         }
     }
@@ -84,22 +157,283 @@
         .chat-bubble {
             .input-form {
                 display: flex;
+                justify-content: space-around;
+                align-items: flex-end;
                 button {
-                    max-height: calc(var(--full-height));
-                    max-width: calc(var(--full-height));
-                    svg {
-                        display: flex;
-                        height: calc(var(--full-height) / 2);
-                        width: calc(var(--full-height) / 2);
-                        path {
-                            stroke: white;
-                        }
+                    height: calc(var(--full-height));
+                    width: calc(var(--full-height));
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border-radius: 50%;
+                    img {
+                        width: calc((var(--full-height) - var(--bubble-padding)) / 1.5);
+                        height: calc((var(--full-height) - var(--bubble-padding)) / 1.5);
                     }
                 }
-                text-area {
-                    min-height: calc(var(--full-height) - var(--padding));
+
+                button:hover {
+                    background: #1a1a1a !important;
+                }
+
+                .mic.recording {
+                    img {
+                        animation: flash 1.5s infinite;
+                    }
+                }
+
+                @keyframes flash {
+                    0% {
+                        opacity: 0;
+                    }
+                    50% {
+                        opacity: 1;
+                    }
+                    100% {
+                        opacity: 0;
+                    }
+                }
+                .input {
+                    min-height: calc(var(--full-height) - var(--bubble-padding));
+                    border-radius: calc(var(--full-height) / 2);
+                    resize: none;
+                    border: none;
+                    min-height: calc(var(--full-height));
+                    padding: calc(var(--bubble-padding) / 2);
+                    width: calc((100% - (2 * var(--full-height))) * 0.9);
                 }
             }
         }
     }
+
+    .ai-side {
+        align-items: end;
+        .avatar-wrapper {
+            --shirt-color: rgb(228, 187, 40);
+            --shirt-shadow: rgb(195, 169, 1);
+            --skin-color: rgb(106, 70, 48);
+            --skin-shadow-color: rgb(83, 40, 13);
+            --hair-color: rgb(0, 0, 0);
+            --eye-color: rgb(99, 43, 87);
+            #avatar {
+                transform: scaleX(-1);
+            }
+        }
+        .chat-bubble {
+            background-color: var(--ai-bubble-color);
+            align-self: end;
+            span {
+                transition: filter 0.5s;
+            }
+            span.translated {
+                font-weight: bold;
+            }
+            span.translated.new {
+                animation: reveal 0.5s forwards;
+            }
+        }
+        .chat-bubble.blurred span {
+            filter: blur(3px);
+        }
+        .chat-bubble.swoop {
+            animation: swoopIn 400ms forwards;
+        }
+    }
+}
+
+@keyframes reveal {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes swoopIn {
+    0% {
+        transform: translate(10%, 10%) rotate(-20deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+.recap-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    h3 {
+        margin: 1vh;
+    }
+    div {
+        margin-bottom: 1vh;
+        width: 50%;
+        text-align: center;
+        div {
+            width: 100%;
+            display: inline;
+            text-align: center;
+            .bolded {
+                font-weight: bold;
+                background: linear-gradient(90deg, var(--orange), var(--pink));
+                -webkit-background-clip: text;
+                        background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: calc(100% - 4vw);
+        padding: 2vw;
+        .blank {
+            width: 200px;
+        }
+        h1 {
+            margin: 0 auto;
+            flex-grow: 1;
+            background: linear-gradient(90deg, var(--orange), var(--pink));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+                    background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: moveGradient 5s infinite;
+        }
+        .back-btn {
+            width: 200px;
+            height: 50px;
+            margin-left: auto;
+        }
+    }
+
+    .wpm-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .slider-wrapper {
+            height: 80px;
+            width: 50%;
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr;
+            .pins {
+                position: relative;
+                width: 100%;
+                max-height: 100%;
+                .marker {
+                    position: absolute;
+                    height: 100%;
+                    width: 20px;
+                    transform: translate(-50%, 0%);
+                }
+                .user-marker {
+                    svg {
+                        fill: var(--user-bubble-color)
+                    }
+                }
+
+                .user-avg-marker svg {
+                    fill: white;
+                }
+
+                .target-marker {
+                    svg {
+                        fill: var(--ai-bubble-color)
+                    }
+                }
+            }
+            .wpm-slider {
+                display: flex;
+                height: 100%;
+                width: 100%;
+                background-image: linear-gradient(to right, var(--user-bubble-color) 0%, var(--ai-bubble-color) 40%, var(--ai-bubble-color) 60%, var(--user-bubble-color) 100%);
+                grid-row: 2;
+            }
+            .labels {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                div {
+                    width: auto;
+                }
+            }
+        }
+        .words {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .slider-wrapper {
+                height: 80px;
+                width: 50%;
+                display: grid;
+                grid-template-rows: 1fr 1fr 1fr;
+                .pins {
+                    position: relative;
+                    width: 100%;
+                    max-height: 100%;
+                    .marker {
+                        position: absolute;
+                        height: 100%;
+                        width: 20px;
+                        transform: translate(-50%, 0%);
+                    }
+                    .user-marker {
+                        svg {
+                            fill: var(--user-bubble-color)
+                        }
+                    }
+    
+                    .user-avg-marker svg {
+                        fill: white;
+                    }
+    
+                    .target-marker {
+                        svg {
+                            fill: var(--ai-bubble-color)
+                        }
+                    }
+                }
+                .wpm-slider {
+                    display: flex;
+                    height: 100%;
+                    width: 100%;
+                    background-image: linear-gradient(to right, var(--user-bubble-color) 0%, var(--ai-bubble-color) 40%, var(--ai-bubble-color) 60%, var(--user-bubble-color) 100%);
+                    grid-row: 2;
+                }
+                .labels {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    div {
+                        width: auto;
+                    }
+                }
+            }
+        }
+    }
+
+    .translations {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .understanding {
+        border-image: linear-gradient(to right, var(--orange) 0%, var(--pink) 100%) 1;
+        border-width: 4px;
+        border-style: solid;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        padding: 1vw;
+    }
+}
+
+@keyframes moveGradient {
+    0%{background-position:10% 0%}
+    50%{background-position:91% 100%}
+    100%{background-position:10% 0%}
 }

@@ -1,0 +1,161 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .header {
+        display: flex;
+        width: calc(100% - 100px);
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 50px;
+        button, .blank {
+            width: 150px;
+            height: fit-content;
+        }
+        h1 {
+            .name {
+                background: linear-gradient(90deg, var(--orange), var(--pink));
+                -webkit-background-clip: text;
+                        background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
+    }
+    .saves {
+        display: flex;
+        width: 50%;
+        flex-direction: column;
+        align-items: center;
+        .saves-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            .blank, button {
+                width: 150px;
+                height: fit-content;
+            }
+        }
+        .save-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            margin-bottom: 25px;
+            .language {
+                font-weight: bold;
+            }
+            .streak .num {
+                background: linear-gradient(90deg, var(--orange), var(--pink));
+                -webkit-background-clip: text;
+                        background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
+        .save-button:hover {
+            .streak .num {
+                background: white;
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
+    }
+}
+
+.save-window {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .top-row {
+        display: flex;
+        width: 80%;
+        justify-content: space-between;
+        align-items: center;
+        margin: 3vh 0;
+    }
+    .autocomplete-input {
+        width: calc(80% - 20px);
+        padding: 10px;
+    }
+}
+
+.save-dashboard {
+    height: 100%;
+    .bolded {
+        font-weight: bold;
+        background: linear-gradient(90deg, var(--orange), var(--pink));
+        -webkit-background-clip: text;
+                background-clip: text;
+        -webkit-text-fill-color: transparent;
+        // color: var(--pink);
+    }
+    .header {
+        display: flex;
+        width: 100%;
+        height: 10%;
+        justify-content: space-around;
+        align-items: center;
+        button {
+            height: 80%;
+        }
+    }
+    .chart-container {
+        width: 500px;
+        height: 300px;
+    }
+}
+
+.settings-window {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    form {
+        width: 80%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        label {
+            width: fit-content;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        input[type=checkbox] {
+            appearance: none; /* For modern browsers */
+            -webkit-appearance: none; /* For WebKit-based browsers */
+            -moz-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 2px;
+            outline: 2px var(--orange) solid;
+            position: relative;
+        }
+
+        input[type=checkbox]:checked {
+            background-color: var(--orange);
+        }
+
+        /*input[type="checkbox"]:checked::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 16px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: translate(-50%, -50%) rotate(45deg);
+          }*/
+    }
+}

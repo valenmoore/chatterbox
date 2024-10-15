@@ -1,9 +1,79 @@
-.avatar {
-    --height: 50vh;
+.avatar-wrapper {
+    --height: 40%;
+    --skin-color: #e2a67d;
+    --skin-shadow-color: #bc6931;
+    --eye-color: #779178;
+    --shirt-color: #cf4141;
+    --shirt-shadow: #c1212d;
+    --hair-color: #3f0b09;
     height: var(--height);
     width: 150px;
     position: relative;
-    .torso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+
+    #avatar {
+        width: 65%;
+        transform: translateY(5px);
+        .head {
+            .cls-1, .cls-2 {
+                fill: #fff;
+            }
+        
+            .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+                stroke: #000;
+                stroke-miterlimit: 10;
+                stroke-width: 3px;
+            }
+        
+            .cls-2, .cls-4 {
+                stroke-linecap: round;
+            }
+        
+            .cls-3 {
+                fill: var(--skin-color);
+            }
+        
+            .cls-6 {
+                fill: var(--eye-color);
+            }
+        
+            .cls-7 {
+                fill: var(--skin-shadow-color);
+            }
+        
+            .cls-4, .cls-5 {
+                fill: none;
+            }
+        }
+    }
+
+    #torso {
+        #apendices {
+            fill: var(--skin-color);
+            stroke: #000;
+            stroke-miterlimit: 10;
+            stroke-width: 3px;
+        }
+
+        #shirt {
+            #outline {
+                fill: none;
+                stroke: #000;
+                stroke-miterlimit: 10;
+                stroke-width: 3px;
+            }
+            #shadow {
+                fill: var(--shirt-shadow);
+            }
+            #color {
+                fill: var(--shirt-color);
+            }
+        }
+    }
+    /*.torso {
         position: absolute;
         top: calc(var(--height) * 0.2);
         height: calc(var(--height) * 0.8);
@@ -21,5 +91,7 @@
         width: calc(var(--height) * 0.2);
         border-radius: 50%;
         background-color: pink;
-    }
+    }*/
+
+    
 }

@@ -8,6 +8,7 @@ const Signup = () => {
  
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
     useEffect(() => {
         // Assuming you want to print the directory of the current file
         const currentFilePath = new URL(import.meta.url).pathname;
@@ -35,22 +36,10 @@ const Signup = () => {
             const ref = collection(db, "users");
             await setDoc(doc(ref, user.uid), {
                 email: user.email,
-                storySaves: [
-                    {
-                        language: "french",
-                        map: {
-                            "Rose's": {
-                                inventory: {
-                                    "apple": {
-                                        quantity: 5,
-                                        price: 2,
-                                        flRequirement: 100
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ]
+                username,
+                saves: [],
+                streak: 0,
+                practicedToday: false
             });
             navigate("/login")
             // ...
@@ -66,57 +55,70 @@ const Signup = () => {
     }
  
   return (
-    <main >        
-        <section>
-            <div>
-                <div>                  
-                    <h1> FocusApp </h1>                                                                            
-                    <form>                                                                                            
-                        <div>
-                            <label htmlFor="email-address">
-                                Email address
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}  
-                                required                                    
-                                placeholder="Email address"                                
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="password">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)} 
-                                required                                 
-                                placeholder="Password"              
-                            />
-                        </div>                                             
-                        
-                        <button
-                            type="submit" 
-                            onClick={onSubmit}                        
-                        >  
-                            Sign up                                
-                        </button>
-                                                                     
-                    </form>
-                   
-                    <p>
-                        Already have an account?{' '}
-                        <NavLink to="/login" >
-                            Sign in
-                        </NavLink>
-                    </p>                   
-                </div>
+    <div className='signup'>
+        <div className="header">
+            <button onClick={() => navigate("/")}>Back Home</button>
+            <div className="text">
+                <h2>Sign up for Chatterbox</h2>
+                <img src="/color-icon.svg" />
             </div>
-        </section>
-    </main>
+            <div className="blank"></div>
+        </div>      
+        <form className='input-form'>                                                                                            
+            <div>
+                <label htmlFor="email-address">
+                    Email address
+                </label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}  
+                    required                                    
+                    placeholder="Email address"                                
+                />
+            </div>
+
+            <div>
+                <label htmlFor="password">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)} 
+                    required                                 
+                    placeholder="Password"              
+                />
+            </div>
+            <div>
+                <label htmlFor="username">
+                    Username
+                </label>
+                <input
+                    type="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)} 
+                    required                                 
+                    placeholder="Username"              
+                />
+            </div>                                             
+            
+            <button
+                type="submit" 
+                onClick={onSubmit}                        
+            >  
+                Sign up                                
+            </button>
+                                                            
+        </form>
+        
+        <p>
+            Already have an account?{' '}
+            <NavLink to="/login" >
+                Sign in
+            </NavLink>
+        </p>                   
+    </div>
   )
 }
  
