@@ -10,7 +10,7 @@ const Recap = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const state = location.state;
-    const { userMessageStats, messages, wordUniqueness, mostCommonWords, languageName, convoIndex, speed } = state || {};
+    const { userMessageStats, messages, wordUniqueness, mostCommonWords, languageName, convoIndex, speed, understandingLength } = state || {};
     const [averageStats, setAverageStats] = useState({});
     const [topTranslatedWords, setTopTranslatedWords] = useState([]);
     const [hasSetStats, setHasSetStats] = useState(false);
@@ -26,7 +26,7 @@ const Recap = () => {
         return Object.keys(obj).sort(function(a,b){return obj[b] - obj[a]});
     }
 
-    const setData = async (wpm, speed, userDoc) => {
+    const setData = async (wpm, userDoc) => {
         if (!hasSetStats && userProfile.user?.uid !== undefined) {
           try {
             const docSnap = await getDoc(userDoc);
@@ -37,7 +37,6 @@ const Recap = () => {
                 // make sure you havent updated already
                 const save = data.saves[index];
                 save.averages.wpms = [...save.averages.wpms, wpm]
-                save.averages.speeds = [...save.averages.speeds, speed];
           
                 const updatedSaves = [...data.saves]; // Clone the array
                 updatedSaves[index] = save; // Update the specific save at index
@@ -64,11 +63,14 @@ const Recap = () => {
       if (userProfile.user?.uid !== undefined) {
         try {
           const docSnap = await getDoc(userDoc);
-          if (data.saves[index].averages.understandings.length === convoIndex) {
+          const data = docSnap.data();
+          if (data.saves[index].averages.understandings.length === understandingLength) {
             if (docSnap.exists()) {
               const data = docSnap.data();
               const save = data.saves[index];
+              console.log(understanding)
               save.averages.understandings = [...save.averages.understandings, understanding];
+              save.averages.speeds = [...save.averages.speeds, speed];
         
               const updatedSaves = [...data.saves]; // Clone the array
               updatedSaves[index] = save; // Update the specific save at index
@@ -83,6 +85,9 @@ const Recap = () => {
               console.error("No such document!");
               return null;
             }
+          } else {
+            // already sent
+            setUnderstandingSent(true);
           }
         } catch (error) {
           console.error("Error adding save: ", error);
@@ -131,7 +136,7 @@ const Recap = () => {
       if (targetWpm === undefined) targetWpm = 200 // default value
 
       const docRef = doc(db, "users", userProfile.user?.uid);
-      setData(wpm, speed, docRef);
+      setData(wpm, docRef);
       const userStats = (await getDocData(docRef)).saves[index].averages;
       const avgWpm = getAverageWpm(userStats.wpms);
       setAverageStats({wpm, targetWpm, avgWpm});
@@ -230,7 +235,7 @@ const Recap = () => {
               </div>) : <h3>No translations!</h3>}
               {!understandingSent && (<div className="understanding">
                 <div>How would you rate your comprehension of this conversation?</div>
-                <input type="range" min={0} max={9} value={understandingIndex} step={1} onChange={e => setUnderstandingIndex(e.target.value)} />
+                <input type="range" min={0} max={9} value={understandingIndex} step={1} onChange={e => setUnderstandingIndex(Number(e.target.value))} />
                 <div className="understanding-sentence">{understandingSentences[understandingIndex]}</div>
                 <button onClick={sendUnderstanding}>Submit</button>
               </div>)}

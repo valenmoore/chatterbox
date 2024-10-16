@@ -10,6 +10,7 @@ import LineChart from "../LineChart/LineChart";
 const SaveDashboard = () => {
     const { index } = useParams();
     const [currentSave, setCurrentSave] = useState(null);
+    const [comprehensionScores, setComprehensionScores] = useState([]);
     const userProfile = useFirebaseAuth();
     const navigate = useNavigate();
 
@@ -45,6 +46,31 @@ const SaveDashboard = () => {
         setCurrentSave(save);
     }
 
+    const mapRange = (value, inMin, inMax, outMin, outMax) => {
+      return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+    }
+
+    const average = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+
+    const getComprehensionScore = (speed, comprehension) => {
+      const maxScore = 100;
+      const score = ((speed + comprehension) / 20) * maxScore;
+      return Math.round(score); // Rounding the result
+    }
+
+    useEffect(() => {
+      if (currentSave) {
+        const understandingScores = [];
+        for (let i = 0; i < currentSave.averages.understandings.length; i++) {
+          const understanding = currentSave.averages.understandings[i]; // 1-10
+          const speed = mapRange(currentSave.averages.speeds[i], 0.25, 2, 1, 10); // 1-10
+          const understandingScore = getComprehensionScore(speed, understanding); // 1-100
+          understandingScores.push(understandingScore);
+        }
+        setComprehensionScores(understandingScores);
+      }
+    }, [currentSave])
+
     const newConversation = () => {
         navigate("/saves/" + index + "/conversation-settings", { state: { languageName: currentSave.language }})
     }
@@ -75,10 +101,24 @@ const SaveDashboard = () => {
                       <h2>Save #{Number(index) + 1}: {languageMap[currentSave?.language]?.full}</h2>
                       <button onClick={newConversation}>New Conversation</button>
                     </div>
-                    <div><span>Current streak: </span><span className="bolded">{currentSave?.streak}</span></div>
-                    <div><span>Average WPM: </span><span className="bolded">{getAvgStat("wpms")}</span></div>
-                    <div className="chart-container">
-                      <LineChart data={currentSave.averages.wpms.map((w, i) => {return {x: i, y: w}})} />
+                    <div className="content">
+                      <h2><span>Current streak: </span><span className="bolded">{currentSave?.streak}</span></h2>
+                      <div className="charts">
+                        <div className="chart">
+                          <h3>WPM over time:</h3>
+                          <div className="chart-container">
+                            <LineChart data={currentSave.averages.wpms.map((w, i) => {return {x: i, y: w}})} />
+                          </div>
+                          <div><span>Average WPM: </span><span className="bolded">{getAvgStat("wpms")}</span></div>
+                        </div>
+                        <div className="chart">
+                          <h3><span className="colorful">Comprehension Score</span> over time:</h3>
+                          <div className="chart-container">
+                            <LineChart data={comprehensionScores.map((w, i) => {return {x: i, y: w}})} forceMin={0} forceMax={100} />
+                          </div>
+                          <div><span>Average Comprehension Score: </span><span className="bolded">{Math.round(average(comprehensionScores))}</span></div>
+                        </div>
+                      </div>
                     </div>
                 </div>
             </>

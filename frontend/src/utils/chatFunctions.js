@@ -465,6 +465,7 @@ export const createSave = async (userDoc, language) => {
             saves: arrayUnion({
               language: language,
               streak: 0,
+              practicedToday: false,
               averages: {
                 wpms: [],
                 understandings: [],

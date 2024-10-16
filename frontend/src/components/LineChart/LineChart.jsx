@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-const LineChart = ({ data, topPadding=50 }) => {
+const LineChart = ({ data, forceMin=null, forceMax=null, topPadding=50 }) => {
     const svgRef = useRef(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const circleRadius = 6;
@@ -69,7 +69,6 @@ const LineChart = ({ data, topPadding=50 }) => {
             const pixelData = ctx.getImageData(pixelX, 0, 1, 1).data;
     
             const color = `rgba(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]}, ${pixelData[3] / 255})`;
-            console.log(stops)
             if (color === 'rgba(0, 0, 0, 0)') return stops[stops.length - 1].getAttribute('stop-color');
             // Return the color in rgba format
             return color;
@@ -115,7 +114,7 @@ const LineChart = ({ data, topPadding=50 }) => {
             .range([0, width]);
 
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.y) + topPadding])
+            .domain([forceMin === null ? 0 : forceMin, forceMax === null ? d3.max(data, d => d.y) + topPadding : forceMax])
             .range([height, 0]);
 
         // Create line
@@ -138,7 +137,6 @@ const LineChart = ({ data, topPadding=50 }) => {
         .attr("stop-color", getCSSVariableValue("--orange"))  // Start color
         .attr("stop-opacity", 1);
 
-    console.log(getCSSVariableValue("--orange"))
 
     gradient.append("stop")
         .attr("offset", "100%")

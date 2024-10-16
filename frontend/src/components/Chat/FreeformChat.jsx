@@ -197,8 +197,9 @@ const Chat = () => {
         const docRef = doc(db, "users", userProfile.user?.uid);
         const docSnap = (await getDoc(docRef)).data();
         const conversationIndex = docSnap.saves[index].averages.wpms.length;
+        const understandingIndex = docSnap.saves[index].averages.understandings.length;
         setConversationStats({...conversationStats, speed: params.speed});
-        navigate('/saves/' + index + '/chat-recap', { state: { userMessageStats: conversationStats, messages, messageStats: temp, wordUniqueness: getWordsUniqueness(userMessages), mostCommonWords: getMostCommonWords(userMessages), languageName: params.languageName, convoIndex: conversationIndex } });
+        navigate('/saves/' + index + '/chat-recap', { state: { userMessageStats: conversationStats, messages, messageStats: temp, wordUniqueness: getWordsUniqueness(userMessages), mostCommonWords: getMostCommonWords(userMessages), speed: params.speed, languageName: params.languageName, convoIndex: conversationIndex, understandingLength: understandingIndex } });
     }
 
     return (
@@ -210,7 +211,7 @@ const Chat = () => {
                 </div>
                 <div className="ai-side">
                     <Avatar />
-                    <AIChatBubble message={aiMessage} language={language} translateFunction={translateText} conversationStats={conversationStats} setConversationStats={setConversationStats} blurred={true} />
+                    <AIChatBubble message={aiMessage} language={language} translateFunction={translateText} conversationStats={conversationStats} setConversationStats={setConversationStats} blurred={params.blurred} />
                 </div>
             </div>
             {/*<div className="input-container">
