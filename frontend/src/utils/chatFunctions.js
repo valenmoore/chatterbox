@@ -438,15 +438,18 @@ export const getMostCommonWords = userMessages => {
     const wordCount = {};
 
     wordsUsed.forEach(word => {
-        wordCount[word] = (wordCount[word] || 0) + 1;
+        word = word.replace(/\W/g, '')
+        if (word !== "") {
+            wordCount[word.toLowerCase()] = (wordCount[word] || 0) + 1;
+        }
     });
 
-    // Convert the object into an array of [word, count] pairs
-    const wordCountArray = Object.entries(wordCount);
+    // Convert the object into an array of [key, value] pairs
+    let sortedWordCountArray = Object.entries(wordCount).sort((a, b) => b[1] - a[1]);
 
-    // Sort the array by word order (alphabetically)
-    wordCountArray.sort((a, b) => a[0].localeCompare(b[0]));
-    return wordCountArray;
+    // Optionally convert the sorted array back into an object
+    let sortedWordCount = Object.fromEntries(sortedWordCountArray);
+    return sortedWordCount;
 }
 
 export const createSave = async (userDoc, language) => {
@@ -470,7 +473,8 @@ export const createSave = async (userDoc, language) => {
                 wpms: [],
                 understandings: [],
                 speeds: [],
-              }
+              },
+              mostCommonWords: {}
             })
           });
     

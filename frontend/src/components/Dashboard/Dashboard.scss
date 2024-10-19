@@ -125,6 +125,54 @@
                 }
             }
         }
+
+        .most-common-words {
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-image: linear-gradient(to right, var(--orange) 0%, var(--pink) 100%) 1;
+            border-width: 4px;
+            border-style: solid;
+            margin-top: 30px;
+            .mcw-header {
+                margin: 10px 0;
+                height: 50px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                h3 {
+                    width: fit-content;
+                    margin-right: 10px;
+                }
+                img {
+                    height: 30%;
+                }
+            }
+            .boxes {
+                width: 80%;
+                padding: 10px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                transition: 1s;
+                opacity: 1;
+                .word-box {
+                    padding: 10px;
+                    background-color: var(--orange);
+                    border-radius: 7px;
+                    width: fit-content;
+                }
+            }
+            .boxes.hidden {
+                /*transform: translateY(-50px);
+                opacity: 0;
+                z-index: -10;*/
+                display: none;
+            }
+        }
     }
 }
 

@@ -10,7 +10,7 @@ const Recap = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const state = location.state;
-    const { userMessageStats, messages, wordUniqueness, mostCommonWords, languageName, convoIndex, speed, understandingLength } = state || {};
+    const { userMessageStats, messages, wordUniqueness, mostCommonWords, languageName, convoIndex, speed, understandingLength, mostCommonWordsIndex } = state || {};
     const [averageStats, setAverageStats] = useState({});
     const [topTranslatedWords, setTopTranslatedWords] = useState([]);
     const [hasSetStats, setHasSetStats] = useState(false);
@@ -26,17 +26,20 @@ const Recap = () => {
         return Object.keys(obj).sort(function(a,b){return obj[b] - obj[a]});
     }
 
-    const setData = async (wpm, userDoc) => {
+    const setData = async (wpm, mostCommonWords, userDoc) => {
         if (!hasSetStats && userProfile.user?.uid !== undefined) {
           try {
             const docSnap = await getDoc(userDoc);
             
             if (docSnap.exists()) {
               const data = docSnap.data();
+              console.log(data.saves[index].averages.wpms.length === convoIndex);
               if (data.saves[index].averages.wpms.length === convoIndex) {
                 // make sure you havent updated already
                 const save = data.saves[index];
                 save.averages.wpms = [...save.averages.wpms, wpm]
+
+                console.log(save.mostCommonWords);
           
                 const updatedSaves = [...data.saves]; // Clone the array
                 updatedSaves[index] = save; // Update the specific save at index
@@ -58,6 +61,49 @@ const Recap = () => {
             setHasSetStats(true);
         }
     }
+
+    const setMostCommonWords = async (mostCommonWords, userDoc) => {
+      if (!hasSetStats && userProfile.user?.uid !== undefined) {
+        try {
+          const docSnap = await getDoc(userDoc);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (Object.keys(data.saves[index].mostCommonWords).length === mostCommonWordsIndex) {
+              // make sure you havent updated already
+              const save = data.saves[index];
+              const prevKeys = Object.keys(save.mostCommonWords)
+              for (const key of Object.keys(mostCommonWords)) {
+                if (prevKeys.includes(key)) save.mostCommonWords[key] += mostCommonWords[key];
+                else save.mostCommonWords[key] = mostCommonWords[key];
+              }
+        
+              const updatedSaves = [...data.saves]; // Clone the array
+              updatedSaves[index] = save; // Update the specific save at index
+              console.log(updatedSaves);
+              
+              // Update the document in Firestore
+              await updateDoc(userDoc, {
+                saves: updatedSaves,
+                practicedToday: true
+              });
+            }
+          } else {
+            console.error("No such document!");
+            return null;
+          }
+        } catch (error) {
+          console.error("Error adding save: ", error);
+        }
+          setHasSetStats(true);
+      }
+    }
+
+    /*                const prevKeys = Object.keys(save.mostCommonWords)
+                for (const key of Object.keys(mostCommonWords)) {
+                  if (prevKeys.includes(key)) save.mostCommonWords[key] += mostCommonWords[key];
+                  else save.mostCommonWords[key] = mostCommonWords[key];
+                }*/
 
     const setUnderstanding = async (understanding, userDoc) => {
       if (userProfile.user?.uid !== undefined) {
@@ -93,7 +139,8 @@ const Recap = () => {
           console.error("Error adding save: ", error);
         }
       }
-  }
+    }
+    
 
     const getDocData = async docRef => {
         const docSnap = await getDoc(docRef);
@@ -131,15 +178,18 @@ const Recap = () => {
     const getStats = async () => {
       console.log(userMessageStats)
       let wpm = Math.round(getAverageWpm(userMessageStats.messageStats.map(m => m.wpm)));
-      if (isNaN(wpm)) wpm = 150;
-      let targetWpm = languageSpeedData[languageName];
-      if (targetWpm === undefined) targetWpm = 200 // default value
-
       const docRef = doc(db, "users", userProfile.user?.uid);
-      setData(wpm, docRef);
-      const userStats = (await getDocData(docRef)).saves[index].averages;
-      const avgWpm = getAverageWpm(userStats.wpms);
-      setAverageStats({wpm, targetWpm, avgWpm});
+
+      if (!isNaN(wpm)) {
+        let targetWpm = languageSpeedData[languageName];
+        if (targetWpm === undefined) targetWpm = 200 // default value
+
+        setData(wpm, docRef);
+        const userStats = (await getDocData(docRef)).saves[index].averages;
+        const avgWpm = getAverageWpm(userStats.wpms);
+        setAverageStats({wpm, targetWpm, avgWpm});
+      }
+      setMostCommonWords(mostCommonWords, docRef);
 
       getTopTranslatedWords();
       setIsLoading(false);
@@ -180,9 +230,15 @@ const Recap = () => {
               <div>
                 <div>Conversation length: <div className="bolded">{messages.length}</div> chats</div>
               </div>
+              {!understandingSent && (<div className="understanding">
+                <div>How would you rate your comprehension of this conversation?</div>
+                <input type="range" min={0} max={9} value={understandingIndex} step={1} onChange={e => setUnderstandingIndex(Number(e.target.value))} />
+                <div className="understanding-sentence">{understandingSentences[understandingIndex]}</div>
+                <button onClick={sendUnderstanding}>Submit</button>
+              </div>)}
               <div className="wpm-section">
                 <h3>Stats:</h3>
-                <div>Your WPM: <div className="bolded">{averageStats.wpm}</div></div>
+                {!isNaN(averageStats.wpm) && <><div>Your WPM: <div className="bolded">{averageStats.wpm}</div></div>
                 <div>Your average WPM: <div className="bolded">{Math.round(averageStats.avgWpm)}</div></div>
                 <div>Target WPM: <div className="bolded">{averageStats.targetWpm}</div></div>
                 <div className="slider-wrapper">
@@ -200,7 +256,7 @@ const Recap = () => {
                     <div>{averageStats.targetWpm - sliderPadding}</div>
                     <div>{averageStats.targetWpm + sliderPadding}</div>
                   </div>
-                </div>
+                </div></>}
                 <div className="words">
                     <div>
                         <div>You used </div><div className="bolded">{wordUniqueness.numUnique}</div><div> unique words.</div>
@@ -233,12 +289,19 @@ const Recap = () => {
                   <div key={index}>{obj.word}: {obj.count} times</div>
                 ))}
               </div>) : <h3>No translations!</h3>}
-              {!understandingSent && (<div className="understanding">
-                <div>How would you rate your comprehension of this conversation?</div>
-                <input type="range" min={0} max={9} value={understandingIndex} step={1} onChange={e => setUnderstandingIndex(Number(e.target.value))} />
-                <div className="understanding-sentence">{understandingSentences[understandingIndex]}</div>
-                <button onClick={sendUnderstanding}>Submit</button>
-              </div>)}
+              <div className="most-common-words">
+                <h3>Words used:</h3>
+                <div className="boxes">
+                  {Object.keys(currentSave.mostCommonWords)
+                    .sort((a, b) => currentSave.mostCommonWords[b] - currentSave.mostCommonWords[a])
+                    .map((word, i) => {
+                      const count = currentSave.mostCommonWords[word]
+                      return (
+                        <div className="word-box" key={i}><span className="word">{word}</span><span>: </span><span>{count} </span><span>{count === 1 ? "time." : "times."}</span></div>
+                      )
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </>

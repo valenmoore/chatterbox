@@ -198,8 +198,9 @@ const Chat = () => {
         const docSnap = (await getDoc(docRef)).data();
         const conversationIndex = docSnap.saves[index].averages.wpms.length;
         const understandingIndex = docSnap.saves[index].averages.understandings.length;
+        const mostCommonWordsIndex = Object.keys(docSnap.saves[index].mostCommonWords).length;
         setConversationStats({...conversationStats, speed: params.speed});
-        navigate('/saves/' + index + '/chat-recap', { state: { userMessageStats: conversationStats, messages, messageStats: temp, wordUniqueness: getWordsUniqueness(userMessages), mostCommonWords: getMostCommonWords(userMessages), speed: params.speed, languageName: params.languageName, convoIndex: conversationIndex, understandingLength: understandingIndex } });
+        navigate('/saves/' + index + '/chat-recap', { state: { userMessageStats: conversationStats, messages, messageStats: temp, wordUniqueness: getWordsUniqueness(userMessages), mostCommonWords: getMostCommonWords(userMessages), speed: params.speed, languageName: params.languageName, convoIndex: conversationIndex, understandingLength: understandingIndex, mostCommonWordsIndex } });
     }
 
     return (

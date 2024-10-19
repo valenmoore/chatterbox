@@ -59,7 +59,7 @@ const Signup = () => {
         <div className="header">
             <button onClick={() => navigate("/")}>Back Home</button>
             <div className="text">
-                <h2>Sign up for Chatterbox</h2>
+                <h2>Sign in to Chatterbox</h2>
                 <img src="/color-icon.svg" />
             </div>
             <div className="blank"></div>
@@ -95,7 +95,7 @@ const Signup = () => {
                     Username
                 </label>
                 <input
-                    type="username"
+                    type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)} 
                     required                                 

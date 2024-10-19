@@ -14,7 +14,7 @@ button:hover {
     100%{background-position:10% 0%}
 }
 
-input[type=text] {
+input[type=text], input[type=password], input[type=email] {
     border: 2px var(--orange) solid;
     border-radius: 7px;
     padding: 10px;

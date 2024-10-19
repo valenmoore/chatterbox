@@ -11,6 +11,7 @@ const SaveDashboard = () => {
     const { index } = useParams();
     const [currentSave, setCurrentSave] = useState(null);
     const [comprehensionScores, setComprehensionScores] = useState([]);
+    const [isMCRCollapsed, setIsMCRCollapsed] = useState(false);
     const userProfile = useFirebaseAuth();
     const navigate = useNavigate();
 
@@ -116,7 +117,23 @@ const SaveDashboard = () => {
                           <div className="chart-container">
                             <LineChart data={comprehensionScores.map((w, i) => {return {x: i, y: w}})} forceMin={0} forceMax={100} />
                           </div>
-                          <div><span>Average Comprehension Score: </span><span className="bolded">{Math.round(average(comprehensionScores))}</span></div>
+                          <div><span>Average Comprehension Score: </span><span className="bolded">{isNan(average(comprehensionScores)) ? "-" : Math.round(average(comprehensionScores))}</span></div>
+                        </div>
+                      </div>
+                      <div className="most-common-words">
+                        <div className="mcw-header">
+                          <h3>Words Used</h3>
+                          <img onClick={() => setIsMCRCollapsed(prev => !prev)} style={{transition: "1s", transform: `scaleY(${isMCRCollapsed ? '-1' : '1'})`}} src="/down-arrow.svg" />
+                        </div>
+                        <div className={isMCRCollapsed ? "boxes hidden" : "boxes"}>
+                          {Object.keys(currentSave.mostCommonWords)
+                            .sort((a, b) => currentSave.mostCommonWords[b] - currentSave.mostCommonWords[a])
+                            .map((word, i) => {
+                              const count = currentSave.mostCommonWords[word]
+                              return (
+                                <div className="word-box" key={i}><span className="word">{word}</span><span>: </span><span>{count} </span><span>{count === 1 ? "time." : "times."}</span></div>
+                              )
+                          })}
                         </div>
                       </div>
                     </div>
