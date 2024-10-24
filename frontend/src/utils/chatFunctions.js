@@ -438,7 +438,7 @@ export const getMostCommonWords = userMessages => {
     const wordCount = {};
 
     wordsUsed.forEach(word => {
-        word = word.replace(/\W/g, '')
+        word = word.replace(/[.,!?]/g, '');
         if (word !== "") {
             wordCount[word.toLowerCase()] = (wordCount[word] || 0) + 1;
         }

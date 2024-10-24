@@ -176,6 +176,8 @@ const Chat = () => {
     };
 
     useEffect(() => {
+        const userMessages = messages.map(m => m.role === "user" ? m.content : undefined).filter(m => m !== undefined);
+        console.log(getMostCommonWords(userMessages))
         if (messages.length > 0) {
             for (let i = messages.length - 1; i >= 0; i--) {
                 if (messages[i].role === "model") {

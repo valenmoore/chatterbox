@@ -117,7 +117,7 @@ const SaveDashboard = () => {
                           <div className="chart-container">
                             <LineChart data={comprehensionScores.map((w, i) => {return {x: i, y: w}})} forceMin={0} forceMax={100} />
                           </div>
-                          <div><span>Average Comprehension Score: </span><span className="bolded">{isNan(average(comprehensionScores)) ? "-" : Math.round(average(comprehensionScores))}</span></div>
+                          <div><span>Average Comprehension Score: </span><span className="bolded">{isNaN(average(comprehensionScores)) ? "-" : Math.round(average(comprehensionScores))}</span></div>
                         </div>
                       </div>
                       <div className="most-common-words">

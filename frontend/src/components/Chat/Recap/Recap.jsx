@@ -292,10 +292,10 @@ const Recap = () => {
               <div className="most-common-words">
                 <h3>Words used:</h3>
                 <div className="boxes">
-                  {Object.keys(currentSave.mostCommonWords)
-                    .sort((a, b) => currentSave.mostCommonWords[b] - currentSave.mostCommonWords[a])
+                  {Object.keys(mostCommonWords)
+                    .sort((a, b) => mostCommonWords[b] - mostCommonWords[a])
                     .map((word, i) => {
-                      const count = currentSave.mostCommonWords[word]
+                      const count = mostCommonWords[word]
                       return (
                         <div className="word-box" key={i}><span className="word">{word}</span><span>: </span><span>{count} </span><span>{count === 1 ? "time." : "times."}</span></div>
                       )
